@@ -4,6 +4,7 @@ import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Stack;
 
 public class BfInterpreter {
 	
@@ -13,9 +14,25 @@ public class BfInterpreter {
 		this.codeString = getCodeBytes(is);
 	}
 	
+	private static int[] getBrackets(byte[] codeString) {
+		int[] brackets = new int[codeString.length];
+		Stack<Integer> stack = new Stack<Integer>();
+		for (int i = 0; i < codeString.length; i++) {
+			if (codeString[i] == '[') {
+				stack.push(i);
+			} else if (codeString[i] == ']') {
+				int current = stack.pop();
+				brackets[current] = i;
+				brackets[i] = current;
+			}
+		}
+		return brackets;
+	}
+	
 	void execute() {
 		byte[] tape = new byte[30000];
 		int tp = 0;
+		int[] brackets = getBrackets(this.codeString);
 		for (int i = 0; i < codeString.length; i++) {
 			switch(codeString[i]) {
 			case '+':
@@ -37,28 +54,12 @@ public class BfInterpreter {
 				break;
 			case '[':
 				if (tape[tp] == 0) {
-					int bracketCount = 1;
-					while (bracketCount != 0) {
-						i++;
-						if (codeString[i] == '[') {
-							bracketCount++;
-						} else if (codeString[i] == ']') {
-							bracketCount--;
-						}
-					}
+					i = brackets[i];
 				}
 				break;
 			case ']':
 				if (tape[tp] != 0) {
-					int bracketCount = -1;
-					while (bracketCount != 0) {
-						i--;
-						if (codeString[i] == '[') {
-							bracketCount++;
-						} else if (codeString[i] == ']') {
-							bracketCount--;
-						}
-					}
+					i = brackets[i];
 				}
 				break;
 			default:
@@ -90,7 +91,9 @@ public class BfInterpreter {
 	
 	public static void main(String[] args) throws IOException {
 		BfInterpreter bfi = new BfInterpreter(new BufferedInputStream(new FileInputStream("/Users/alexgriffin/eclipse-workspace/Java-bf/src/mandelbrot.bf")));
+		long l = System.currentTimeMillis();
 		bfi.execute();
+		System.out.println("The interpreter took " + (System.currentTimeMillis() - l) + " milliseconds.");
 	}
 
 }
