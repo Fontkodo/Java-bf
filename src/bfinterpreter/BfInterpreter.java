@@ -29,95 +29,38 @@ public class BfInterpreter {
 		return brackets;
 	}
 	
-	private static int[] plusRepeats(byte[] codeString) {
-		int[] plusRepeats = new int[codeString.length];
-		int current = 0;
-		for (int i = 0; i < codeString.length; i++) {
-			if (codeString[i] == '+') {
-				if (codeString[current] != '+') {
-					current = i;
-				}
-				plusRepeats[current]++;
-			} else {
-				current = i;
+	private static int[] charRepeats(byte[] codeString) {
+		int[] charRepeats = new int[codeString.length];
+		for (int i = (codeString.length - 2); i >= 0; i--) {
+			if (codeString[i] == codeString[i+1]) {
+				charRepeats[i] = (1 + charRepeats[i+1]);
 			}
 		}
-		return plusRepeats;
-	}
-	
-	private static int[] minusRepeats(byte[] codeString) {
-		int[] minusRepeats = new int[codeString.length];
-		int current = 0;
-		for (int i = 0; i < codeString.length; i++) {
-			if (codeString[i] == '-') {
-				if (codeString[current] != '-') {
-					current = i;
-				}
-				minusRepeats[current]++;
-			} else {
-				current = i;
-			}
-		}
-		return minusRepeats;
-	}
-	
-	private static int[] rightRepeats(byte[] codeString) {
-		int[] rightRepeats = new int[codeString.length];
-		int current = 0;
-		for (int i = 0; i < codeString.length; i++) {
-			if (codeString[i] == '>') {
-				if (codeString[current] != '>') {
-					current = i;
-				}
-				rightRepeats[current]++;
-			} else {
-				current = i;
-			}
-		}
-		return rightRepeats;
-	}
-	
-	private static int[] leftRepeats(byte[] codeString) {
-		int[] leftRepeats = new int[codeString.length];
-		int current = 0;
-		for (int i = 0; i < codeString.length; i++) {
-			if (codeString[i] == '<') {
-				if (codeString[current] != '<') {
-					current = i;
-				}
-				leftRepeats[current]++;
-			} else {
-				current = i;
-			}
-		}
-		return leftRepeats;
+		return charRepeats;
 	}
 	
 	void execute() {
 		byte[] tape = new byte[30000];
 		int tp = 0;
 		int[] brackets = getBrackets(this.codeString);
-		int[] plusRepeats = plusRepeats(this.codeString);
-		int[] minusRepeats = minusRepeats(this.codeString);
-		int[] rightRepeats = rightRepeats(this.codeString);
-		int[] leftRepeats = leftRepeats(this.codeString);
+		int[] repeats = charRepeats(this.codeString);
 		for (int i = 0; i < codeString.length; i++) {
 			switch(codeString[i]) {
 			case '+':
-				tape[tp] += plusRepeats[i];
-				i += (plusRepeats[i] - 1);
+				tape[tp] += (repeats[i] + 1);
+				i += repeats[i];
 				break;
 			case '-':
-				tape[tp] -= minusRepeats[i];
-				i += (minusRepeats[i] - 1);
+				tape[tp] -= (repeats[i] + 1);
+				i += repeats[i];
 				break;
 			case '>':
-				tp = ((tp + rightRepeats[i]) % 30000);
-				i += (rightRepeats[i] - 1);
+				tp = ((tp + (repeats[i] + 1)) % 30000);
+				i += repeats[i];
 				break;
 			case '<':
-				tp = ((tp - leftRepeats[i]) % 30000);
-				i += (leftRepeats[i] - 1);
+				tp = ((tp - (repeats[i] + 1)) % 30000);
+				i += repeats[i];
 				break;
 			case ',':
 				throw new RuntimeException("Reading is for losers");
