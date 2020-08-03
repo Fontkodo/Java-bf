@@ -29,23 +29,95 @@ public class BfInterpreter {
 		return brackets;
 	}
 	
+	private static int[] plusRepeats(byte[] codeString) {
+		int[] plusRepeats = new int[codeString.length];
+		int current = 0;
+		for (int i = 0; i < codeString.length; i++) {
+			if (codeString[i] == '+') {
+				if (codeString[current] != '+') {
+					current = i;
+				}
+				plusRepeats[current]++;
+			} else {
+				current = i;
+			}
+		}
+		return plusRepeats;
+	}
+	
+	private static int[] minusRepeats(byte[] codeString) {
+		int[] minusRepeats = new int[codeString.length];
+		int current = 0;
+		for (int i = 0; i < codeString.length; i++) {
+			if (codeString[i] == '-') {
+				if (codeString[current] != '-') {
+					current = i;
+				}
+				minusRepeats[current]++;
+			} else {
+				current = i;
+			}
+		}
+		return minusRepeats;
+	}
+	
+	private static int[] rightRepeats(byte[] codeString) {
+		int[] rightRepeats = new int[codeString.length];
+		int current = 0;
+		for (int i = 0; i < codeString.length; i++) {
+			if (codeString[i] == '>') {
+				if (codeString[current] != '>') {
+					current = i;
+				}
+				rightRepeats[current]++;
+			} else {
+				current = i;
+			}
+		}
+		return rightRepeats;
+	}
+	
+	private static int[] leftRepeats(byte[] codeString) {
+		int[] leftRepeats = new int[codeString.length];
+		int current = 0;
+		for (int i = 0; i < codeString.length; i++) {
+			if (codeString[i] == '<') {
+				if (codeString[current] != '<') {
+					current = i;
+				}
+				leftRepeats[current]++;
+			} else {
+				current = i;
+			}
+		}
+		return leftRepeats;
+	}
+	
 	void execute() {
 		byte[] tape = new byte[30000];
 		int tp = 0;
 		int[] brackets = getBrackets(this.codeString);
+		int[] plusRepeats = plusRepeats(this.codeString);
+		int[] minusRepeats = minusRepeats(this.codeString);
+		int[] rightRepeats = rightRepeats(this.codeString);
+		int[] leftRepeats = leftRepeats(this.codeString);
 		for (int i = 0; i < codeString.length; i++) {
 			switch(codeString[i]) {
 			case '+':
-				tape[tp]++;
+				tape[tp] += plusRepeats[i];
+				i += (plusRepeats[i] - 1);
 				break;
 			case '-':
-				tape[tp]--;
+				tape[tp] -= minusRepeats[i];
+				i += (minusRepeats[i] - 1);
 				break;
 			case '>':
-				tp = ((tp + 1) % 30000);
+				tp = ((tp + rightRepeats[i]) % 30000);
+				i += (rightRepeats[i] - 1);
 				break;
 			case '<':
-				tp = ((tp - 1) % 30000);
+				tp = ((tp - leftRepeats[i]) % 30000);
+				i += (leftRepeats[i] - 1);
 				break;
 			case ',':
 				throw new RuntimeException("Reading is for losers");
