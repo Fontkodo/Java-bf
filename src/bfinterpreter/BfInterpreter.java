@@ -39,7 +39,7 @@ public class BfInterpreter {
 		return charRepeats;
 	}
 	
-	void execute() {
+	void execute() throws IOException {
 		byte[] tape = new byte[30000];
 		int tp = 0;
 		int[] brackets = getBrackets(this.codeString);
@@ -63,7 +63,14 @@ public class BfInterpreter {
 				i += repeats[i];
 				break;
 			case ',':
-				throw new RuntimeException("Reading is for losers");
+				{
+					int c = System.in.read();
+					if (c == -1) {
+						throw new RuntimeException("Reading past end of file");
+					}
+					tape[tp] = (byte) c;
+				}
+				break;
 			case '.':
 				System.out.write(tape[tp]);
 				break;
@@ -105,7 +112,10 @@ public class BfInterpreter {
 	}
 	
 	public static void main(String[] args) throws IOException {
-		BfInterpreter bfi = new BfInterpreter(new BufferedInputStream(new FileInputStream("/Users/alexgriffin/eclipse-workspace/Java-bf/src/mandelbrot.bf")));
+		if (args.length < 1) {
+			throw new RuntimeException("No file provided");
+		}
+		BfInterpreter bfi = new BfInterpreter(new BufferedInputStream(new FileInputStream(args[0])));
 		long l = System.currentTimeMillis();
 		bfi.execute();
 		System.out.println("The interpreter took " + (System.currentTimeMillis() - l) + " milliseconds.");
